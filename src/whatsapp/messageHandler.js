@@ -90,14 +90,14 @@ export class MessageHandler {
       logger.info(`✅ Chat autorizado: ${chatId}`);
 
       // PASSO 5: Adicionar mensagem ao buffer e agendar processamento
-      this.addMessageToBuffer(chatId, messageText, sender, timestamp);
+      this.addMessageToBuffer(chatId, messageText, sender, timestamp, message);
 
     } catch (error) {
       logger.error('❌ Erro ao processar mensagem:', error);
     }
   }
 
-  addMessageToBuffer(chatId, messageText, sender, timestamp) {
+  addMessageToBuffer(chatId, messageText, sender, timestamp, originalMessage) {
     // Inicializar buffer se não existir
     if (!this.messageBuffers.has(chatId)) {
       this.messageBuffers.set(chatId, []);
@@ -105,7 +105,7 @@ export class MessageHandler {
 
     // Adicionar mensagem ao buffer
     const buffer = this.messageBuffers.get(chatId);
-    buffer.push({ text: messageText, sender, timestamp });
+    buffer.push({ text: messageText, sender, timestamp, originalMessage });
     logger.info(`📦 Mensagem adicionada ao buffer. Total no buffer: ${buffer.length}`);
 
     // Cancelar timer anterior se existir
@@ -144,8 +144,11 @@ export class MessageHandler {
       logger.info(`🔄 Processando ${buffer.length} mensagens agrupadas de ${chatId}`);
       logger.info(`📝 Texto agrupado (preview): ${groupedText.substring(0, 200)}...`);
 
+      // Pegar a última mensagem original para fazer reply
+      const lastMessage = buffer[buffer.length - 1].originalMessage;
+
       // Processar com Gemini
-      await this.generateAndSendResponse(chatId, groupedText, buffer[0].sender);
+      await this.generateAndSendResponse(chatId, groupedText, buffer[0].sender, lastMessage);
 
       // Limpar buffer e timer
       this.messageBuffers.delete(chatId);
@@ -233,10 +236,13 @@ export class MessageHandler {
     }
   }
 
-  async generateAndSendResponse(chatId, incomingMessage, sender) {
+  async generateAndSendResponse(chatId, incomingMessage, sender, originalMessage = null) {
     try {
       logger.info(`🤖 Gerando resposta para: ${sender}`);
       logger.info(`📝 Mensagem recebida: ${incomingMessage}`);
+      if (originalMessage) {
+        logger.info(`💬 Mensagem original disponível para reply`);
+      }
 
       // Verificar se é contato especial
       const specialContactInfo = this.chatConfig.getSpecialContactInfo(chatId);
@@ -280,11 +286,11 @@ export class MessageHandler {
       logger.info(`⏱️ Aguardando ${Math.round(delay)}ms antes de responder...`);
       await new Promise(resolve => setTimeout(resolve, delay));
 
-      // Enviar resposta
+      // Enviar resposta (com reply se tiver mensagem original)
       logger.info('📤 Enviando resposta...');
-      await sendMessage(this.sock, chatId, response);
+      await sendMessage(this.sock, chatId, response, originalMessage);
       
-      logger.info(`✅ Resposta enviada para ${chatId}`);
+      logger.info(`✅ Resposta enviada para ${chatId}${originalMessage ? ' com reply' : ''}`);
 
       // Salvar resposta gerada no histórico
       logger.info('💾 Salvando resposta no histórico...');

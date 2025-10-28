@@ -133,14 +133,24 @@ export async function startWhatsAppClient() {
   return sock;
 }
 
-export async function sendMessage(sock, chatId, text, options = {}) {
+export async function sendMessage(sock, chatId, text, quotedMessage = null) {
   try {
     logger.info(`📤 Enviando mensagem para ${chatId}: ${text.substring(0, 50)}...`);
-    const result = await sock.sendMessage(chatId, {
-      text: text,
-      ...options
-    });
-    logger.info(`✅ Mensagem ENVIADA COM SUCESSO para ${chatId}`);
+    
+    const messagePayload = {
+      text: text
+    };
+    
+    const sendOptions = {};
+    
+    // Adicionar quoted se fornecido
+    if (quotedMessage) {
+      logger.info(`💬 Fazendo reply da mensagem ID: ${quotedMessage.key?.id}`);
+      sendOptions.quoted = quotedMessage;
+    }
+    
+    const result = await sock.sendMessage(chatId, messagePayload, sendOptions);
+    logger.info(`✅ Mensagem ENVIADA COM SUCESSO para ${chatId}${quotedMessage ? ' (com reply)' : ''}`);
     return result;
   } catch (error) {
     logger.error(`❌ Erro ao enviar mensagem para ${chatId}:`, error);

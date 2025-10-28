@@ -7,20 +7,25 @@
 - [x] Integração com Gemini 2.5 Flash
 - [x] Aprendizado de estilo do usuário
 - [x] Memória de conversação
-- [x] Agrupamento de mensagens (debounce 30s)
+- [x] Agrupamento de mensagens (debounce 30s, 15s para contatos especiais)
 - [x] Comandos (!authorize, !deauthorize, !status, !relearn)
 - [x] Remoção de emojis das respostas
 - [x] Sistema de contatos especiais com respostas personalizadas
+- [x] Sistema de Reply (cita mensagem original automaticamente)
 
 ---
 
 ## 🎯 Prioridade ALTA (Fazer Agora)
 
 ### 1. ✨ Sistema de Reply (Citar Mensagem Original)
-**Status:** 🔴 Pendente  
-**Descrição:** Quando o bot responder, deve fazer reply da mensagem original do usuário  
-**Motivo:** Fica mais claro em grupos qual mensagem está sendo respondida  
-**Estimativa:** 30 minutos  
+**Status:** ✅ CONCLUÍDO  
+**Descrição:** Quando o bot responder, faz reply da mensagem original do usuário  
+**Implementação:**
+- Mensagem original armazenada no buffer de agrupamento
+- Última mensagem do buffer usada para reply
+- Função sendMessage aceita parâmetro `quoted`
+- Reply automático em todas as respostas
+- Logs específicos indicam quando faz reply
 **Arquivos:** `src/whatsapp/client.js`, `src/whatsapp/messageHandler.js`
 
 ### 2. 🎤 Transcrição de Áudio (Speech-to-Text)
