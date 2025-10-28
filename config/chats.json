@@ -1,0 +1,29 @@
+{
+  "enabled": true,
+  "authorizedChats": [],
+  "authorizedGroups": [],
+  "blacklist": [],
+  "settings": {
+    "respondToAll": false,
+    "onlyMentions": false,
+    "autoLearn": true,
+    "responseDelay": 2000,
+    "maxResponseLength": 500,
+    "autoLearningInterval": 3600000
+  },
+  "_info": {
+    "lastUpdated": "2025-10-28T15:00:00Z",
+    "description": "⚙️ Configure aqui quais chats e grupos o bot pode responder",
+    "_howToUse": {
+      "authorizedChats": "IDs de chats pessoais (formato: '5511999999999@s.whatsapp.net')",
+      "authorizedGroups": "IDs de grupos (formato: '120363...-..@g.us')",
+      "blacklist": "Chats completamente bloqueados",
+      "respondToAll": "Se true, responde TODOS os chats (cuidado!)",
+      "responseDelay": "Delay realista entre receber e responder (2-4 segundos)"
+    },
+    "_examples": {
+      "findChatId": "Envie !status para ver seu ID do chat",
+      "findGroupId": "Envie !status em um grupo para ver o ID"
+    }
+  }
+}

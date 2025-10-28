@@ -1,0 +1,46 @@
+{
+  "name": "whatsapp-ai-bot",
+  "version": "1.0.0",
+  "description": "Bot de WhatsApp com IA personalizada que aprende seu padrão de resposta",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop whatsapp-ai-bot",
+    "pm2:restart": "pm2 restart whatsapp-ai-bot",
+    "pm2:logs": "pm2 logs whatsapp-ai-bot",
+    "pm2:monit": "pm2 monit",
+    "db:backup": "node scripts/backup-db.js",
+    "db:clean": "node scripts/clean-old-messages.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "ia",
+    "gemini",
+    "baileys",
+    "nodejs"
+  ],
+  "author": "Capitão Henrique",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@hapi/boom": "^10.0.1",
+    "@whiskeysockets/baileys": "^6.7.0",
+    "dotenv": "^16.4.5",
+    "js-yaml": "^4.1.0",
+    "pino": "^9.5.0",
+    "pino-pretty": "^11.2.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7",
+    "pm2": "^5.4.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
