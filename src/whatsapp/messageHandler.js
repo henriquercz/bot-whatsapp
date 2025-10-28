@@ -14,13 +14,23 @@ export class MessageHandler {
 
   async handleIncomingMessage(message) {
     try {
+      logger.info('🔔 handleIncomingMessage chamado');
+      
       // Validação básica
-      if (!message.message) return;
-      if (message.key.fromMe === undefined) return;
+      if (!message.message) {
+        logger.info('⚠️ Mensagem sem conteúdo, ignorando');
+        return;
+      }
+      if (message.key.fromMe === undefined) {
+        logger.info('⚠️ Mensagem sem key.fromMe, ignorando');
+        return;
+      }
 
       const chatId = message.key.remoteJid;
       const messageId = message.key.id;
       const isFromMe = message.key.fromMe;
+      
+      logger.info(`📍 ChatID: ${chatId}, MessageID: ${messageId}, FromMe: ${isFromMe}`);
       
       // Evitar processar mesma mensagem duas vezes
       if (this.responseQueue.has(messageId)) return;
@@ -29,19 +39,22 @@ export class MessageHandler {
 
       // Extrair texto da mensagem
       const messageText = this.extractMessageText(message);
-      if (!messageText) return;
+      if (!messageText) {
+        logger.info('⚠️ Não foi possível extrair texto da mensagem, ignorando');
+        return;
+      }
 
       const sender = message.key.participant || chatId;
       const timestamp = message.messageTimestamp * 1000;
 
-      logger.debug(`📨 [${sender}] ${messageText.substring(0, 50)}...`);
+      logger.info(`📨 Mensagem recebida de [${chatId}]: ${messageText.substring(0, 50)}...`);
 
       // PASSO 1: Salvar para Aprendizado
       this.memory.saveMessage(chatId, sender, messageText, isFromMe, timestamp);
 
       // PASSO 2: Se é mensagem própria
       if (isFromMe) {
-        logger.debug('📝 Mensagem própria salva para aprendizado');
+        logger.info('📝 Mensagem própria salva para aprendizado');
         
         // Atualizar perfil de estilo periodicamente
         const lastAnalysis = this.memory.getLastStyleAnalysis();
@@ -57,19 +70,20 @@ export class MessageHandler {
         return;
       }
 
-      // PASSO 3: Verificar Autorização
-      if (!this.chatConfig.isAuthorized(chatId)) {
-        logger.debug(`🚫 Chat não autorizado: ${chatId}`);
-        return;
-      }
-
-      logger.debug(`✅ Chat autorizado: ${chatId}`);
-
-      // PASSO 4: Verificar Comandos Admin
+      // PASSO 3: Verificar Comandos Admin PRIMEIRO (antes de autorização)
       if (messageText.startsWith('!')) {
+        logger.info(`⚙️ Comando detectado: ${messageText}`);
         await this.handleCommand(messageText, chatId, sender);
         return;
       }
+
+      // PASSO 4: Verificar Autorização (para mensagens normais)
+      if (!this.chatConfig.isAuthorized(chatId)) {
+        logger.info(`🚫 Chat não autorizado: ${chatId}. Use !authorize para autorizar.`);
+        return;
+      }
+
+      logger.info(`✅ Chat autorizado: ${chatId}`);
 
       // PASSO 5: Gerar e Enviar Resposta
       await this.generateAndSendResponse(chatId, messageText, sender);

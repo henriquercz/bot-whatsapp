@@ -46,7 +46,9 @@ async function main() {
     
     // Listener de mensagens
     sock.ev.on('messages.upsert', async (m) => {
+      logger.info(`📬 Evento messages.upsert recebido com ${m.messages.length} mensagem(ns)`);
       for (const msg of m.messages) {
+        logger.info('📤 Processando mensagem...');
         await messageHandler.handleIncomingMessage(msg);
       }
     });
@@ -54,6 +56,7 @@ async function main() {
     logger.info('🤖 Bot pronto para receber mensagens!');
     logger.info('📝 Envie suas próprias mensagens para o bot aprender seu estilo');
     logger.info('⚙️ Use !authorize em um chat para autorizar respostas automáticas');
+    logger.info('🎯 Listener de mensagens registrado com sucesso!');
     
   } catch (error) {
     logger.error('❌ Erro fatal ao iniciar bot:', error);
