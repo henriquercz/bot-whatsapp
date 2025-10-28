@@ -181,7 +181,7 @@ Agora responda de forma carinhosa mas natural:`;
       constraints: [
         'Respostas curtas (max 200 caracteres)',
         'Usar emojis apropriados',
-        'Ser natural e conversacional'
+        'Ser natural e conversacional' // vou colocar o pra dar commit po eu cmmitei errado.
       ]
     };
   }
