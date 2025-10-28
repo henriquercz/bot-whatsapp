@@ -114,14 +114,18 @@ export class MessageHandler {
       logger.info(`⏱️ Timer anterior cancelado para ${chatId}`);
     }
 
+    // Verificar se é contato especial para usar delay menor
+    const specialContactInfo = this.chatConfig.getSpecialContactInfo(chatId);
+    const delay = specialContactInfo ? 15000 : this.MESSAGE_GROUP_DELAY; // 15s para especiais, 30s para outros
+
     // Criar novo timer
     const timer = setTimeout(async () => {
       logger.info(`⏰ Timer disparado! Processando ${buffer.length} mensagens agrupadas de ${chatId}`);
       await this.processGroupedMessages(chatId);
-    }, this.MESSAGE_GROUP_DELAY);
+    }, delay);
 
     this.messageTimers.set(chatId, timer);
-    logger.info(`⏱️ Novo timer de ${this.MESSAGE_GROUP_DELAY/1000}s iniciado para ${chatId}`);
+    logger.info(`⏱️ Novo timer de ${delay/1000}s iniciado para ${chatId}${specialContactInfo ? ' (contato especial 💝)' : ''}`);
   }
 
   async processGroupedMessages(chatId) {
