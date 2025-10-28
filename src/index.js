@@ -44,12 +44,26 @@ async function main() {
       chatConfig
     );
     
-    // Listener de mensagens
+    // Listener de TODOS os eventos para debug
     sock.ev.on('messages.upsert', async (m) => {
-      logger.info(`📬 Evento messages.upsert recebido com ${m.messages.length} mensagem(ns)`);
+      logger.info('═══════════════════════════════════════════════════════════');
+      logger.info(`📬 EVENTO messages.upsert RECEBIDO!`);
+      logger.info(`📊 Total de mensagens: ${m.messages.length}`);
+      logger.info(`📋 Tipo do evento: ${m.type}`);
+      logger.info('═══════════════════════════════════════════════════════════');
+      
       for (const msg of m.messages) {
-        logger.info('📤 Processando mensagem...');
-        await messageHandler.handleIncomingMessage(msg);
+        logger.info('┌─────────────────────────────────────────────────────────');
+        logger.info('│ 📤 PROCESSANDO MENSAGEM...');
+        logger.info(`│ 💬 Key: ${JSON.stringify(msg.key)}`);
+        logger.info(`│ 📝 Message: ${JSON.stringify(msg.message)}`);
+        logger.info('└─────────────────────────────────────────────────────────');
+        
+        try {
+          await messageHandler.handleIncomingMessage(msg);
+        } catch (error) {
+          logger.error('❌ ERRO ao processar mensagem:', error);
+        }
       }
     });
     
@@ -57,6 +71,10 @@ async function main() {
     logger.info('📝 Envie suas próprias mensagens para o bot aprender seu estilo');
     logger.info('⚙️ Use !authorize em um chat para autorizar respostas automáticas');
     logger.info('🎯 Listener de mensagens registrado com sucesso!');
+    logger.info('');
+    logger.info('═══════════════════════════════════════════════════════════');
+    logger.info('   🔍 MODO DEBUG ATIVADO - Envie uma mensagem para testar');
+    logger.info('═══════════════════════════════════════════════════════════');
     
   } catch (error) {
     logger.error('❌ Erro fatal ao iniciar bot:', error);

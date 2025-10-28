@@ -69,40 +69,53 @@ export class ChatConfigManager {
   }
 
   isAuthorized(chatId) {
+    logger.info(`🔍 Verificando autorização para: ${chatId}`);
+    logger.info(`📋 Chats autorizados: ${JSON.stringify(this.config.authorizedChats)}`);
+    logger.info(`📋 Grupos autorizados: ${JSON.stringify(this.config.authorizedGroups)}`);
+    
     // Verificar se está na blacklist (prioridade máxima)
     if (this.config.blacklist.includes(chatId)) {
-      logger.debug(`🚫 Chat em blacklist: ${chatId}`);
+      logger.info(`🚫 Chat em blacklist: ${chatId}`);
       return false;
     }
 
     // Se respondToAll está ativado e não está em blacklist
     if (this.config.settings.respondToAll) {
+      logger.info(`✅ respondToAll ativado`);
       return true;
     }
 
     // Verificar se é grupo ou chat pessoal
     const isGroup = chatId.endsWith('@g.us');
+    logger.info(`🔎 É grupo? ${isGroup}`);
 
     if (isGroup) {
-      return this.config.authorizedGroups.includes(chatId);
+      const authorized = this.config.authorizedGroups.includes(chatId);
+      logger.info(`${authorized ? '✅' : '❌'} Grupo ${authorized ? 'AUTORIZADO' : 'NÃO autorizado'}`);
+      return authorized;
     } else {
-      return this.config.authorizedChats.includes(chatId);
+      const authorized = this.config.authorizedChats.includes(chatId);
+      logger.info(`${authorized ? '✅' : '❌'} Chat ${authorized ? 'AUTORIZADO' : 'NÃO autorizado'}`);
+      return authorized;
     }
   }
 
   addAuthorizedChat(chatId, isGroup = false) {
     try {
+      logger.info(`🔧 Tentando autorizar chat: ${chatId}, isGroup: ${isGroup}`);
       const list = isGroup ? 'authorizedGroups' : 'authorizedChats';
+      logger.info(`📝 Adicionando em: ${list}`);
 
       if (!this.config[list].includes(chatId)) {
         this.config[list].push(chatId);
         this.saveConfig(this.config);
         
-        logger.info(`✅ Chat autorizado: ${chatId}`);
+        logger.info(`✅ Chat AUTORIZADO COM SUCESSO: ${chatId}`);
+        logger.info(`📋 Lista atualizada (${list}): ${JSON.stringify(this.config[list])}`);
         return true;
       }
 
-      logger.debug(`⚠️ Chat já estava autorizado: ${chatId}`);
+      logger.info(`⚠️ Chat já estava autorizado: ${chatId}`);
       return false;
 
     } catch (error) {

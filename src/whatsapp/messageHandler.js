@@ -49,10 +49,17 @@ export class MessageHandler {
 
       logger.info(`📨 Mensagem recebida de [${chatId}]: ${messageText.substring(0, 50)}...`);
 
-      // PASSO 1: Salvar para Aprendizado
+      // PASSO 1: Verificar Comandos PRIMEIRO (antes de tudo!)
+      if (messageText.startsWith('!')) {
+        logger.info(`⚙️ Comando detectado: ${messageText}`);
+        await this.handleCommand(messageText, chatId, sender);
+        return;
+      }
+
+      // PASSO 2: Salvar para Aprendizado
       this.memory.saveMessage(chatId, sender, messageText, isFromMe, timestamp);
 
-      // PASSO 2: Se é mensagem própria
+      // PASSO 3: Se é mensagem própria
       if (isFromMe) {
         logger.info('📝 Mensagem própria salva para aprendizado');
         
@@ -67,13 +74,6 @@ export class MessageHandler {
           await this.memory.analyzeUserStyle();
         }
         
-        return;
-      }
-
-      // PASSO 3: Verificar Comandos Admin PRIMEIRO (antes de autorização)
-      if (messageText.startsWith('!')) {
-        logger.info(`⚙️ Comando detectado: ${messageText}`);
-        await this.handleCommand(messageText, chatId, sender);
         return;
       }
 
@@ -108,15 +108,18 @@ export class MessageHandler {
 
   async handleCommand(text, chatId, sender) {
     try {
+      logger.info(`🎮 Executando comando: ${text}`);
       const command = this.commandParser.parse(text);
+      logger.info(`📋 Comando parseado: ${JSON.stringify(command)}`);
       
       switch (command.type) {
         case 'authorize':
           const isGroup = chatId.endsWith('@g.us');
+          logger.info(`🔧 Comando authorize - chatId: ${chatId}, isGroup: ${isGroup}`);
           await this.chatConfig.addAuthorizedChat(command.chatId || chatId, isGroup);
           await sendMessage(this.sock, chatId, 
-            `✅ Chat autorizado! Agora vou responder mensagens aqui.`);
-          logger.info(`✅ Chat autorizado: ${command.chatId || chatId}`);
+            `✅ Chat autorizado! Agora vou responder mensagens aqui.\n\nID do chat: ${chatId}`);
+          logger.info(`✅ Autorização concluída para: ${command.chatId || chatId}`);
           break;
           
         case 'deauthorize':

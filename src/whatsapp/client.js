@@ -135,11 +135,12 @@ export async function startWhatsAppClient() {
 
 export async function sendMessage(sock, chatId, text, options = {}) {
   try {
+    logger.info(`📤 Enviando mensagem para ${chatId}: ${text.substring(0, 50)}...`);
     const result = await sock.sendMessage(chatId, {
       text: text,
       ...options
     });
-    logger.debug(`📤 Mensagem enviada para ${chatId}`);
+    logger.info(`✅ Mensagem ENVIADA COM SUCESSO para ${chatId}`);
     return result;
   } catch (error) {
     logger.error(`❌ Erro ao enviar mensagem para ${chatId}:`, error);

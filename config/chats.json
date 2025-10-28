@@ -1,6 +1,8 @@
 {
   "enabled": true,
-  "authorizedChats": [],
+  "authorizedChats": [
+    "5511984027282@s.whatsapp.net"
+  ],
   "authorizedGroups": [],
   "blacklist": [],
   "settings": {
