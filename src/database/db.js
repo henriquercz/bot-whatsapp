@@ -1,4 +1,4 @@
-import { DatabaseSync } from 'node:sqlite';
+import Database from 'better-sqlite3';
 import logger from '../utils/logger.js';
 import fs from 'fs';
 import path from 'path';
@@ -13,7 +13,7 @@ export function initializeDatabase(dbPath = './data/database.sqlite') {
   }
 
   // Conectar ao banco
-  const db = new DatabaseSync(dbPath);
+  const db = new Database(dbPath);
   logger.info(`🗄️ Conectado ao banco de dados: ${dbPath}`);
 
   // Criar tabelas
