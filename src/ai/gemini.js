@@ -114,6 +114,20 @@ export class GeminiAI {
     let cleaned = text.replace(/\*\*/g, '');
     cleaned = cleaned.replace(/\*/g, '');
     
+    // Remover emojis e símbolos decorativos
+    // Regex para remover emojis Unicode
+    cleaned = cleaned.replace(/[\u{1F600}-\u{1F64F}]/gu, ''); // Emoticons
+    cleaned = cleaned.replace(/[\u{1F300}-\u{1F5FF}]/gu, ''); // Símbolos e pictogramas
+    cleaned = cleaned.replace(/[\u{1F680}-\u{1F6FF}]/gu, ''); // Transporte e mapas
+    cleaned = cleaned.replace(/[\u{1F1E0}-\u{1F1FF}]/gu, ''); // Bandeiras
+    cleaned = cleaned.replace(/[\u{2600}-\u{26FF}]/gu, '');   // Símbolos diversos
+    cleaned = cleaned.replace(/[\u{2700}-\u{27BF}]/gu, '');   // Dingbats
+    cleaned = cleaned.replace(/[\u{1F900}-\u{1F9FF}]/gu, ''); // Emojis suplementares
+    cleaned = cleaned.replace(/[\u{1FA00}-\u{1FA6F}]/gu, ''); // Símbolos estendidos
+    cleaned = cleaned.replace(/[\u{1FA70}-\u{1FAFF}]/gu, ''); // Símbolos e pictogramas estendidos
+    cleaned = cleaned.replace(/[\u{FE00}-\u{FE0F}]/gu, '');   // Variações de seleção
+    cleaned = cleaned.replace(/[\u{200D}]/gu, '');            // Zero width joiner
+    
     // Remover URLs muito longas
     cleaned = cleaned.replace(
       /https?:\/\/[^\s]{50,}/g,

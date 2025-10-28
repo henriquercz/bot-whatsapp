@@ -27,7 +27,6 @@ export class PromptBuilder {
 **Tom de Voz:** ${userStyle.tone || 'casual, amigável'}
 **Nível de Formalidade:** ${userStyle.formality || 'informal'}
 **Comprimento Médio de Mensagens:** ${userStyle.avgLength || 100} caracteres
-**Frequência de Emojis:** ${userStyle.emojiFrequency || 'moderada'} 
 **Expressões Comuns Usadas:** ${(userStyle.commonPhrases || []).slice(0, 5).join(', ') || 'nenhuma específica'}
 
 === INSTRUÇÕES DE COMPORTAMENTO ===
@@ -35,7 +34,7 @@ export class PromptBuilder {
 1. **Responda como essa pessoa responderia**, não como um assistente de IA genérico
 2. **Mantenha a naturalidade** - use as mesmas gírias, expressões e padrões gramaticais
 3. **Respeite o comprimento** - se a pessoa responde com mensagens curtas, faça o mesmo
-4. **Use emojis corretamente** - com a mesma frequência e contexto
+4. **NUNCA use emojis** - responda apenas com texto puro, sem qualquer emoji
 5. **Adapte-se ao tema** - mude seu tom conforme necessário, mas mantendo a essência
 6. **Seja conciso** - evite explicações longas ou formais desnecessárias
 
@@ -50,10 +49,11 @@ ${this.buildFewShotExamples(userStyle)}
 - ❌ NÃO use asteriscos para destaque (**negrito**)
 - ❌ NÃO faça discursos longos
 - ❌ NÃO mude bruscamente de personalidade
+- ❌ NUNCA JAMAIS use emojis, emoticons ou símbolos decorativos
 - ✅ SIM, use a natureza conversa e informal
 - ✅ SIM, responda de forma breve e direta
-- ✅ SIM, use emojis apropriados
 - ✅ SIM, seja autêntico ao estilo
+- ✅ SIM, use apenas texto puro
 
 === CONTEXTO DO CHAT ===
 ${chatId ? `Chat ID: ${chatId}` : 'Conversação pessoal'}
