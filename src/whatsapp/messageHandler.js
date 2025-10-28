@@ -234,6 +234,12 @@ export class MessageHandler {
       logger.info(`🤖 Gerando resposta para: ${sender}`);
       logger.info(`📝 Mensagem recebida: ${incomingMessage}`);
 
+      // Verificar se é contato especial
+      const specialContactInfo = this.chatConfig.getSpecialContactInfo(chatId);
+      if (specialContactInfo) {
+        logger.info(`💝 Contato especial detectado: ${specialContactInfo.type} (${specialContactInfo.name})`);
+      }
+
       // Buscar histórico recente
       logger.info('📚 Buscando histórico recente...');
       const recentMessages = this.memory.getRecentMessages(chatId, 10);
@@ -255,7 +261,8 @@ export class MessageHandler {
         incomingMessage,
         conversationHistory,
         userStyle,
-        chatId
+        chatId,
+        specialContactInfo
       );
       logger.info(`🤖 Resposta do Gemini: ${response?.substring(0, 50)}...`);
 

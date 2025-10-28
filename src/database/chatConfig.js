@@ -36,6 +36,7 @@ export class ChatConfigManager {
       authorizedChats: [],
       authorizedGroups: [],
       blacklist: [],
+      specialContacts: {},
       settings: {
         respondToAll: false,
         onlyMentions: false,
@@ -49,6 +50,13 @@ export class ChatConfigManager {
         description: "⚙️ Configure aqui quais chats e grupos o bot pode responder"
       }
     };
+  }
+
+  getSpecialContactInfo(chatId) {
+    if (this.config.specialContacts && this.config.specialContacts[chatId]) {
+      return this.config.specialContacts[chatId];
+    }
+    return null;
   }
 
   saveConfig(config) {

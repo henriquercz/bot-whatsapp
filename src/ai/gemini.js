@@ -32,7 +32,8 @@ export class GeminiAI {
     currentMessage,
     conversationHistory,
     userStyle,
-    chatId
+    chatId,
+    specialContactInfo = null
   ) {
     try {
       // Rate limiting
@@ -42,7 +43,7 @@ export class GeminiAI {
       logger.debug(`📤 Chamada Gemini #${this.callCount}`);
 
       // Construir prompt personalizado
-      const systemPrompt = this.promptBuilder.buildSystemPrompt(userStyle, chatId);
+      const systemPrompt = this.promptBuilder.buildSystemPrompt(userStyle, chatId, specialContactInfo);
       
       // Chamar Gemini
       logger.info('📞 Chamando Gemini 2.5 Flash...');

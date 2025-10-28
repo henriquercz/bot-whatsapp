@@ -5,6 +5,13 @@
   ],
   "authorizedGroups": ["120363387051776715@g.us"],
   "blacklist": [],
+  "specialContacts": {
+    "5511997744301@s.whatsapp.net": {
+      "type": "namorada",
+      "name": "amor",
+      "responseStyle": "carinhoso_acolhedor"
+    }
+  },
   "settings": {
     "respondToAll": false,
     "onlyMentions": false,

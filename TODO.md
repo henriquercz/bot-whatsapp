@@ -9,6 +9,8 @@
 - [x] Memória de conversação
 - [x] Agrupamento de mensagens (debounce 30s)
 - [x] Comandos (!authorize, !deauthorize, !status, !relearn)
+- [x] Remoção de emojis das respostas
+- [x] Sistema de contatos especiais com respostas personalizadas
 
 ---
 
