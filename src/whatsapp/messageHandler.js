@@ -10,6 +10,10 @@ export class MessageHandler {
     this.chatConfig = chatConfig;
     this.commandParser = new CommandParser();
     this.responseQueue = new Map();
+    // Sistema de agrupamento de mensagens
+    this.messageBuffers = new Map(); // Buffer de mensagens por chatId
+    this.messageTimers = new Map(); // Timers de debounce por chatId
+    this.MESSAGE_GROUP_DELAY = 30000; // 30 segundos
   }
 
   async handleIncomingMessage(message) {
@@ -85,11 +89,70 @@ export class MessageHandler {
 
       logger.info(`✅ Chat autorizado: ${chatId}`);
 
-      // PASSO 5: Gerar e Enviar Resposta
-      await this.generateAndSendResponse(chatId, messageText, sender);
+      // PASSO 5: Adicionar mensagem ao buffer e agendar processamento
+      this.addMessageToBuffer(chatId, messageText, sender, timestamp);
 
     } catch (error) {
       logger.error('❌ Erro ao processar mensagem:', error);
+    }
+  }
+
+  addMessageToBuffer(chatId, messageText, sender, timestamp) {
+    // Inicializar buffer se não existir
+    if (!this.messageBuffers.has(chatId)) {
+      this.messageBuffers.set(chatId, []);
+    }
+
+    // Adicionar mensagem ao buffer
+    const buffer = this.messageBuffers.get(chatId);
+    buffer.push({ text: messageText, sender, timestamp });
+    logger.info(`📦 Mensagem adicionada ao buffer. Total no buffer: ${buffer.length}`);
+
+    // Cancelar timer anterior se existir
+    if (this.messageTimers.has(chatId)) {
+      clearTimeout(this.messageTimers.get(chatId));
+      logger.info(`⏱️ Timer anterior cancelado para ${chatId}`);
+    }
+
+    // Criar novo timer
+    const timer = setTimeout(async () => {
+      logger.info(`⏰ Timer disparado! Processando ${buffer.length} mensagens agrupadas de ${chatId}`);
+      await this.processGroupedMessages(chatId);
+    }, this.MESSAGE_GROUP_DELAY);
+
+    this.messageTimers.set(chatId, timer);
+    logger.info(`⏱️ Novo timer de ${this.MESSAGE_GROUP_DELAY/1000}s iniciado para ${chatId}`);
+  }
+
+  async processGroupedMessages(chatId) {
+    try {
+      const buffer = this.messageBuffers.get(chatId);
+      if (!buffer || buffer.length === 0) {
+        logger.warn(`⚠️ Buffer vazio para ${chatId}`);
+        return;
+      }
+
+      // Agrupar textos das mensagens
+      const groupedText = buffer.map((msg, index) => 
+        `Mensagem ${index + 1}: "${msg.text}"`
+      ).join('\n\n');
+
+      logger.info(`🔄 Processando ${buffer.length} mensagens agrupadas de ${chatId}`);
+      logger.info(`📝 Texto agrupado (preview): ${groupedText.substring(0, 200)}...`);
+
+      // Processar com Gemini
+      await this.generateAndSendResponse(chatId, groupedText, buffer[0].sender);
+
+      // Limpar buffer e timer
+      this.messageBuffers.delete(chatId);
+      this.messageTimers.delete(chatId);
+      logger.info(`✅ Buffer e timer limpos para ${chatId}`);
+
+    } catch (error) {
+      logger.error(`❌ Erro ao processar mensagens agrupadas de ${chatId}:`, error);
+      // Limpar mesmo em caso de erro
+      this.messageBuffers.delete(chatId);
+      this.messageTimers.delete(chatId);
     }
   }
 

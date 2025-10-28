@@ -53,35 +53,18 @@ export class GeminiAI {
       
       logger.info('✅ Enviando para Gemini...');
       const result = await this.model.generateContent(fullPrompt);
-      logger.info('📨 Resultado recebido!');
+      logger.info('📨 Resposta recebida do Gemini!');
       
-      // Tentar obter texto diretamente
-      let responseText;
-      try {
-        // Método 1: Via response.text()
-        const response = result.response;
-        responseText = response.text();
-        logger.info(`✅ Método 1 funcionou! Length: ${responseText?.length}`);
-      } catch (error1) {
-        logger.warn(`⚠️ Método 1 falhou: ${error1.message}`);
-        try {
-          // Método 2: Via candidates
-          if (result.response?.candidates?.[0]?.content?.parts?.[0]?.text) {
-            responseText = result.response.candidates[0].content.parts[0].text;
-            logger.info(`✅ Método 2 funcionou! Length: ${responseText?.length}`);
-          }
-        } catch (error2) {
-          logger.error(`❌ Método 2 falhou: ${error2.message}`);
-          logger.error(`❌ Result structure: ${JSON.stringify(result, null, 2).substring(0, 500)}`);
-        }
-      }
+      // Obter texto da resposta
+      const response = result.response;
+      const responseText = response.text();
       
       if (!responseText) {
-        logger.warn('⚠️ Resposta vazia do Gemini após todas as tentativas');
+        logger.warn('⚠️ Resposta vazia do Gemini');
         return null;
       }
 
-      logger.info(`✅ Texto extraído: ${responseText.substring(0, 100)}...`);
+      logger.info(`✅ Resposta processada (${responseText.length} caracteres)`);
       
       if (!responseText) {
         logger.warn('⚠️ Texto de resposta vazio');
