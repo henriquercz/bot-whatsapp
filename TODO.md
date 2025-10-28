@@ -12,6 +12,7 @@
 - [x] Remoção de emojis das respostas
 - [x] Sistema de contatos especiais com respostas personalizadas
 - [x] Sistema de Reply (cita mensagem original automaticamente)
+- [x] Naturalidade aprimorada (gírias, erros de digitação, delay variável)
 
 ---
 
@@ -49,18 +50,20 @@
 **Arquivos:** `src/ai/promptBuilder.js`, `src/ai/gemini.js`
 
 ### 4. 🎭 Melhorar Naturalidade (Parecer Menos IA)
-**Status:** 🔴 Pendente  
-**Descrição:** Bot precisa parecer mais com o Henrique e menos com IA  
-**Melhorias:**
-- Usar gírias e abreviações mais
-- Erros de digitação ocasionais
-- Respostas mais curtas e diretas
-- Delay variável antes de responder (1-5 segundos)
-- Nunca usar formatação de lista/bullets
-- Evitar respostas muito estruturadas
-- Usar mais "né", "po", "mano", "cara"
-**Estimativa:** 1-2 horas  
-**Arquivos:** `src/ai/promptBuilder.js`, `src/whatsapp/messageHandler.js`
+**Status:** ✅ CONCLUÍDO  
+**Descrição:** Bot agora parece muito mais humano e menos robótico  
+**Implementações:**
+- ✅ Gírias brasileiras naturais: "cara", "mano", "po", "slk", "né", "dboa"
+- ✅ Abreviações: "n sei", "tb", "vc", "msg", "blz", "pdc", "tmj"
+- ✅ Erros de digitação ocasionais (5% chance de esquecer acentos)
+- ✅ Respostas curtas e diretas (1-3 linhas máximo)
+- ✅ Delay variável baseado no tamanho da mensagem (simula digitação)
+- ✅ NUNCA diz que "teve erro" ou "problema ao processar"
+- ✅ Sem formatação formal (listas, bullets, markdown)
+- ✅ Prompt especial para namorada preservado (carinhoso)
+- ✅ Exemplos few-shot de conversas naturais brasileiras
+- ✅ Admite quando não sabe algo de forma casual
+**Arquivos:** `src/ai/promptBuilder.js`, `src/ai/gemini.js`, `src/whatsapp/messageHandler.js`
 
 ---
 

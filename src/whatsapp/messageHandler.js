@@ -281,9 +281,14 @@ export class MessageHandler {
         return;
       }
 
-      // Aplicar delay realista (2-4 segundos)
-      const delay = 2000 + Math.random() * 2000;
-      logger.info(`⏱️ Aguardando ${Math.round(delay)}ms antes de responder...`);
+      // Aplicar delay realista e variável (1-5 segundos)
+      // Mensagens mais longas = delay maior (simula digitação)
+      const baseDelay = 1500;
+      const lengthFactor = Math.min(response.length * 20, 3000); // até 3s extra
+      const randomFactor = Math.random() * 1000;
+      const delay = baseDelay + lengthFactor + randomFactor;
+      
+      logger.info(`⏱️ Aguardando ${Math.round(delay)}ms antes de responder (simulando digitação)...`);
       await new Promise(resolve => setTimeout(resolve, delay));
 
       // Enviar resposta (com reply se tiver mensagem original)
@@ -303,12 +308,9 @@ export class MessageHandler {
       logger.error('❌ Tipo de erro:', error.name);
       logger.error('❌ Mensagem do erro:', error.message);
       
-      try {
-        await sendMessage(this.sock, chatId, 
-          '⚠️ Desculpa, tive um problema ao processar sua mensagem. Tenta de novo?');
-      } catch (sendError) {
-        logger.error('❌ Erro ao enviar mensagem de erro:', sendError);
-      }
+      // NÃO enviar mensagem de erro para o usuário
+      // Deixar silencioso para parecer mais natural
+      logger.info('💭 Erro silenciado - nenhuma resposta enviada ao usuário');
     }
   }
 

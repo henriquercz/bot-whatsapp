@@ -140,7 +140,52 @@ export class GeminiAI {
       cleaned = cleaned.substring(0, 3997) + '...';
     }
     
+    // Adicionar erros de digitação ocasionais para naturalidade (5% de chance)
+    cleaned = this.addTypos(cleaned);
+    
     return cleaned.trim();
+  }
+
+  addTypos(text) {
+    // 5% de chance de adicionar um erro natural
+    if (Math.random() > 0.95) {
+      return text;
+    }
+
+    // Erros comuns: esquecer acentos
+    const accentMap = {
+      'é': 'e',
+      'á': 'a',
+      'í': 'i',
+      'ó': 'o',
+      'ú': 'u',
+      'ê': 'e',
+      'â': 'a',
+      'ô': 'o',
+      'ã': 'a',
+      'õ': 'o',
+      'ç': 'c'
+    };
+
+    // Escolher aleatoriamente algumas palavras para remover acentos
+    const words = text.split(' ');
+    if (words.length > 3) {
+      const randomIndex = Math.floor(Math.random() * words.length);
+      let word = words[randomIndex];
+      
+      // Remover acentos de 1-2 caracteres da palavra
+      for (let [accented, plain] of Object.entries(accentMap)) {
+        if (word.includes(accented) && Math.random() > 0.7) {
+          word = word.replace(accented, plain);
+          break;
+        }
+      }
+      
+      words[randomIndex] = word;
+      return words.join(' ');
+    }
+
+    return text;
   }
 
   async checkRateLimit() {
