@@ -6,6 +6,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
+    "start:windows": "chcp 65001 && node src/index.js",
     "dev": "nodemon src/index.js",
     "pm2:start": "pm2 start ecosystem.config.js",
     "pm2:stop": "pm2 stop whatsapp-ai-bot",

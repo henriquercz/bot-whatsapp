@@ -14,13 +14,13 @@ export class GeminiAI {
     
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.model = this.genAI.getGenerativeModel({ 
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-2.5-flash',
       generationConfig: {
         temperature: 0.85,
-        maxOutputTokens: 500,
+        maxOutputTokens: 2000, // Aumentado para não cortar resposta
       },
     });
-    logger.info(`🔑 Gemini 2.0 Flash Experimental inicializado`);
+    logger.info(`🔑 Gemini 2.5 Flash inicializado`);
     
     this.promptBuilder = new PromptBuilder();
     this.callCount = 0;
@@ -45,7 +45,7 @@ export class GeminiAI {
       const systemPrompt = this.promptBuilder.buildSystemPrompt(userStyle, chatId);
       
       // Chamar Gemini
-      logger.info('📞 Chamando Gemini 2.0 Flash Experimental...');
+      logger.info('📞 Chamando Gemini 2.5 Flash...');
       logger.info(`📝 Current message: ${currentMessage}`);
       
       // Montar o prompt completo simples
@@ -53,17 +53,35 @@ export class GeminiAI {
       
       logger.info('✅ Enviando para Gemini...');
       const result = await this.model.generateContent(fullPrompt);
-      const response = await result.response;
-      logger.info('📨 Resposta recebida!');
+      logger.info('📨 Resultado recebido!');
       
-      const responseText = response.text();
+      // Tentar obter texto diretamente
+      let responseText;
+      try {
+        // Método 1: Via response.text()
+        const response = result.response;
+        responseText = response.text();
+        logger.info(`✅ Método 1 funcionou! Length: ${responseText?.length}`);
+      } catch (error1) {
+        logger.warn(`⚠️ Método 1 falhou: ${error1.message}`);
+        try {
+          // Método 2: Via candidates
+          if (result.response?.candidates?.[0]?.content?.parts?.[0]?.text) {
+            responseText = result.response.candidates[0].content.parts[0].text;
+            logger.info(`✅ Método 2 funcionou! Length: ${responseText?.length}`);
+          }
+        } catch (error2) {
+          logger.error(`❌ Método 2 falhou: ${error2.message}`);
+          logger.error(`❌ Result structure: ${JSON.stringify(result, null, 2).substring(0, 500)}`);
+        }
+      }
       
       if (!responseText) {
-        logger.warn('⚠️ Resposta vazia do Gemini');
+        logger.warn('⚠️ Resposta vazia do Gemini após todas as tentativas');
         return null;
       }
 
-      logger.info('✅ Texto extraído com sucesso');
+      logger.info(`✅ Texto extraído: ${responseText.substring(0, 100)}...`);
       
       if (!responseText) {
         logger.warn('⚠️ Texto de resposta vazio');

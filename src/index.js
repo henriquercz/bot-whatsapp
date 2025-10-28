@@ -12,6 +12,21 @@ import { ConversationMemory } from './memory/conversationMemory.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Configurar encoding UTF-8 para Windows
+if (process.platform === 'win32') {
+  try {
+    // Tentar configurar o console do Windows para UTF-8
+    if (process.stdout && process.stdout.setEncoding) {
+      process.stdout.setEncoding('utf8');
+    }
+    if (process.stderr && process.stderr.setEncoding) {
+      process.stderr.setEncoding('utf8');
+    }
+  } catch (e) {
+    // Ignorar erros de configuração de encoding
+  }
+}
+
 async function main() {
   try {
     logger.info('🚀 Iniciando WhatsApp AI Bot...');
