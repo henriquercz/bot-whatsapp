@@ -1,6 +1,7 @@
 # Variáveis de ambiente
 .env
 .env.local
+.env.production
 
 # Dados sensíveis
 data/auth/
