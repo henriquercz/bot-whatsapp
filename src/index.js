@@ -57,6 +57,7 @@ async function main() {
     
   } catch (error) {
     logger.error('❌ Erro fatal ao iniciar bot:', error);
+    console.error('Stack trace completo:', error);
     process.exit(1);
   }
 }

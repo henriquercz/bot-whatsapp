@@ -5,6 +5,8 @@ import makeWASocket, {
   downloadMediaMessage
 } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
+import qrcode from 'qrcode-terminal';
+import pino from 'pino';
 import logger from '../utils/logger.js';
 import fs from 'fs';
 import path from 'path';
@@ -25,16 +27,13 @@ export async function startWhatsAppClient() {
 
   const sock = makeWASocket({
     auth: state,
-    printQRInTerminal: true,
     browser: Browsers.ubuntu('WhatsApp AI Bot v1.0'),
     syncFullHistory: false,
     markOnlineOnConnect: true,
     connectionTimeoutMs: 60_000,
     keepAliveIntervalMs: 30_000,
     generateHighQualityLinkPreview: false,
-    logger: {
-      level: 'silent',
-    },
+    logger: pino({ level: 'silent' }),
   });
 
   // Salvar credenciais quando atualizadas
@@ -46,10 +45,15 @@ export async function startWhatsAppClient() {
   // Gerenciar conexão
   sock.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect, isNewLogin, qr } = update;
+    
+    logger.debug('Update de conexão:', JSON.stringify({ connection, hasQr: !!qr, hasError: !!lastDisconnect?.error }));
 
     if (qr) {
       logger.info('📲 Novo QR Code gerado. Escaneie com seu WhatsApp:');
       logger.info('   (Abra WhatsApp → Dispositivos Conectados → Conectar Dispositivo)');
+      console.log('\n');
+      qrcode.generate(qr, { small: true });
+      console.log('\n');
     }
 
     if (connection === 'connecting') {
