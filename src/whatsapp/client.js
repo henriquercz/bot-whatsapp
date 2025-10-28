@@ -5,7 +5,7 @@ import makeWASocket, {
   downloadMediaMessage
 } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
-import qrcode from 'qrcode-terminal';
+import QRCode from 'qrcode';
 import pino from 'pino';
 import logger from '../utils/logger.js';
 import fs from 'fs';
@@ -24,16 +24,22 @@ export async function startWhatsAppClient() {
   // Carregar ou criar estado de autenticação
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_PATH);
   logger.info('🔐 Estado de autenticação carregado/criado');
+  
+  // Aguardar antes de conectar para evitar rate limit
+  await new Promise(resolve => setTimeout(resolve, 2000));
 
   const sock = makeWASocket({
     auth: state,
-    browser: Browsers.ubuntu('WhatsApp AI Bot v1.0'),
+    browser: Browsers.macOS('Safari'),
+    version: [2, 3000, 1025091846], // ← Versão específica que funciona
+    defaultQueryTimeoutMs: 0, // ← Sem timeout de query
+    connectionTimeoutMs: 60_000, // ← 60 segundos de timeout
     syncFullHistory: false,
-    markOnlineOnConnect: true,
-    connectionTimeoutMs: 60_000,
-    keepAliveIntervalMs: 30_000,
-    generateHighQualityLinkPreview: false,
-    logger: pino({ level: 'silent' }),
+    markOnlineOnConnect: false,
+    getMessage: async (key) => {
+      return { conversation: 'hello' };
+    },
+    logger: pino({ level: 'fatal' }),
   });
 
   // Salvar credenciais quando atualizadas
@@ -43,16 +49,43 @@ export async function startWhatsAppClient() {
   });
 
   // Gerenciar conexão
+  let pairingCodeRequested = false;
+  
   sock.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect, isNewLogin, qr } = update;
     
     logger.debug('Update de conexão:', JSON.stringify({ connection, hasQr: !!qr, hasError: !!lastDisconnect?.error }));
 
-    if (qr) {
+    // Usar Pairing Code APENAS quando receber um QR
+    if (qr && !pairingCodeRequested && process.env.WHATSAPP_PHONE_NUMBER) {
+      pairingCodeRequested = true;
+      const phoneNumber = process.env.WHATSAPP_PHONE_NUMBER.replace(/[^0-9]/g, '');
+      logger.info('📱 Solicitando código de pareamento para: ' + phoneNumber);
+      try {
+        const code = await sock.requestPairingCode(phoneNumber);
+        logger.info('🔑 CÓDIGO DE PAREAMENTO: ' + code);
+        logger.info('📲 Abra WhatsApp no celular → Dispositivos Conectados → Conectar usando número');
+        logger.info(`📝 Digite o código: ${code}`);
+        console.log('\n');
+        console.log('═══════════════════════════════════════');
+        console.log(`   CÓDIGO DE PAREAMENTO: ${code}`);
+        console.log('═══════════════════════════════════════');
+        console.log('\n');
+      } catch (error) {
+        logger.error('❌ Erro ao solicitar pairing code:', error);
+        pairingCodeRequested = false;
+      }
+    } else if (qr && !process.env.WHATSAPP_PHONE_NUMBER) {
+      // Fallback para QR Code se não tiver número
       logger.info('📲 Novo QR Code gerado. Escaneie com seu WhatsApp:');
       logger.info('   (Abra WhatsApp → Dispositivos Conectados → Conectar Dispositivo)');
       console.log('\n');
-      qrcode.generate(qr, { small: true });
+      try {
+        const qrString = await QRCode.toString(qr, { type: 'terminal', small: true });
+        console.log(qrString);
+      } catch (error) {
+        logger.error('❌ Erro ao gerar QR Code:', error);
+      }
       console.log('\n');
     }
 
@@ -60,28 +93,34 @@ export async function startWhatsAppClient() {
       logger.info('⏳ Conectando ao WhatsApp...');
     } else if (connection === 'open') {
       logger.info('✅ Conectado ao WhatsApp com sucesso!');
+      pairingCodeRequested = false; // Reset para próxima reconexão
       if (isNewLogin) {
         logger.info('🆕 Nova autenticação realizada!');
       }
     } else if (connection === 'close') {
-      const reason = new Boom(lastDisconnect?.error).output?.statusCode;
-      const shouldReconnect = reason !== DisconnectReason.loggedOut;
-
-      if (reason === DisconnectReason.loggedOut) {
-        logger.warn('⚠️ Logout detectado. Credenciais invalidadas. Escaneie novo QR Code.');
-      } else if (reason === DisconnectReason.connectionClosed) {
-        logger.warn('⚠️ Conexão fechada. Reconectando...');
-      } else if (reason === DisconnectReason.connectionLost) {
-        logger.warn('⚠️ Conexão perdida. Reconectando...');
-      } else if (reason === DisconnectReason.connectionReplaced) {
-        logger.warn('⚠️ Conexão substituída em outro dispositivo.');
-      } else if (reason === DisconnectReason.restartRequired) {
-        logger.warn('⚠️ Reinício necessário. Reconectando...');
+      const statusCode = lastDisconnect?.error?.output?.statusCode;
+      const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+      
+      logger.warn(`⚠️ Conexão fechada. Código: ${statusCode}`);
+      
+      if (statusCode === DisconnectReason.loggedOut) {
+        logger.error('❌ Você foi deslogado. Deletando credenciais antigas...');
+        // Limpar credenciais
+        if (fs.existsSync(AUTH_PATH)) {
+          fs.rmSync(AUTH_PATH, { recursive: true, force: true });
+          fs.mkdirSync(AUTH_PATH, { recursive: true });
+          logger.info('🗑️ Credenciais limpas. Reinicie o bot para novo pareamento.');
+        }
+        process.exit(0);
       }
 
       if (shouldReconnect) {
         logger.info('🔄 Reconectando em 5 segundos...');
+        pairingCodeRequested = false; // Reset para permitir novo código
         setTimeout(() => startWhatsAppClient(), 5000);
+      } else {
+        logger.error('❌ Não é possível reconectar. Bot será encerrado.');
+        process.exit(1);
       }
     }
   });
