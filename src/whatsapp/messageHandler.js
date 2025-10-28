@@ -169,23 +169,32 @@ export class MessageHandler {
   async generateAndSendResponse(chatId, incomingMessage, sender) {
     try {
       logger.info(`🤖 Gerando resposta para: ${sender}`);
+      logger.info(`📝 Mensagem recebida: ${incomingMessage}`);
 
       // Buscar histórico recente
+      logger.info('📚 Buscando histórico recente...');
       const recentMessages = this.memory.getRecentMessages(chatId, 10);
+      logger.info(`📚 Histórico obtido: ${recentMessages.length} mensagens`);
       
       // Obter perfil de estilo
+      logger.info('🎨 Obtendo perfil de estilo...');
       const userStyle = this.memory.getUserStyle();
+      logger.info(`🎨 Perfil obtido: ${JSON.stringify(userStyle)}`);
       
       // Formatar histórico para Gemini
+      logger.info('📋 Formatando histórico para Gemini...');
       const conversationHistory = this.formatHistoryForGemini(recentMessages);
+      logger.info(`📋 Histórico formatado: ${conversationHistory.length} entradas`);
 
       // Gerar resposta com Gemini
+      logger.info('🤖 Chamando Gemini AI...');
       const response = await this.geminiAI.generateResponse(
         incomingMessage,
         conversationHistory,
         userStyle,
         chatId
       );
+      logger.info(`🤖 Resposta do Gemini: ${response?.substring(0, 50)}...`);
 
       if (!response) {
         logger.warn('⚠️ Gemini retornou resposta vazia');
@@ -194,18 +203,25 @@ export class MessageHandler {
 
       // Aplicar delay realista (2-4 segundos)
       const delay = 2000 + Math.random() * 2000;
+      logger.info(`⏱️ Aguardando ${Math.round(delay)}ms antes de responder...`);
       await new Promise(resolve => setTimeout(resolve, delay));
 
       // Enviar resposta
+      logger.info('📤 Enviando resposta...');
       await sendMessage(this.sock, chatId, response);
       
       logger.info(`✅ Resposta enviada para ${chatId}`);
 
       // Salvar resposta gerada no histórico
+      logger.info('💾 Salvando resposta no histórico...');
       this.memory.saveMessage(chatId, 'bot', response, true, Date.now());
+      logger.info('✅ Resposta salva no histórico');
 
     } catch (error) {
       logger.error('❌ Erro ao gerar resposta:', error);
+      logger.error('❌ Stack trace:', error.stack);
+      logger.error('❌ Tipo de erro:', error.name);
+      logger.error('❌ Mensagem do erro:', error.message);
       
       try {
         await sendMessage(this.sock, chatId, 
