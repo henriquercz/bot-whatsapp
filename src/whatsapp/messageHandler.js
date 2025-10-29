@@ -116,7 +116,7 @@ export class MessageHandler {
 
     // Verificar se é contato especial para usar delay menor
     const specialContactInfo = this.chatConfig.getSpecialContactInfo(chatId);
-    const delay = specialContactInfo ? 15000 : this.MESSAGE_GROUP_DELAY; // 15s para especiais, 30s para outros
+    const delay = specialContactInfo ? 90000 : this.MESSAGE_GROUP_DELAY; // 15s para especiais, 30s para outros
 
     // Criar novo timer
     const timer = setTimeout(async () => {
