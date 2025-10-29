@@ -61,50 +61,32 @@ async function main() {
     
     console.log('\n\n🚀🚀🚀 REGISTRANDO LISTENER DE MENSAGENS 🚀🚀🚀\n\n');
     
-    // DEBUG: Capturar TODOS os eventos para descobrir qual está sendo usado
-    const possibleEvents = [
-      'messages.upsert',
-      'messages.update',
-      'message.upsert',
-      'message.update',
-      'messaging-history.set',
-      'chats.upsert',
-      'chats.update',
-      'presence.update',
-      'contacts.update'
-    ];
-    
-    possibleEvents.forEach(eventName => {
-      sock.ev.on(eventName, (data) => {
-        console.log(`\n\n🔥🔥🔥 EVENTO CAPTURADO: ${eventName} 🔥🔥🔥\n\n`);
-        logger.info(`════════════════════════════════════════════════════════════`);
-        logger.info(`🔥 EVENTO: ${eventName}`);
-        logger.info(`📦 Dados: ${JSON.stringify(data, null, 2)}`);
-        logger.info(`════════════════════════════════════════════════════════════`);
-      });
-    });
-    
-    // Listener de mensagens (evento antigo)
-    sock.ev.on('messages.upsert', async (m) => {
+    // Listener de mensagens (BAILEYS 7.0 formato correto)
+    sock.ev.on('messages.upsert', async ({ type, messages }) => {
       console.log('\n\n📬📬📬 MENSAGEM RECEBIDA (messages.upsert)! 📬📬📬\n\n');
       logger.info('═══════════════════════════════════════════════════════════');
       logger.info(`📬 EVENTO messages.upsert RECEBIDO!`);
-      logger.info(`📊 Total de mensagens: ${m.messages.length}`);
-      logger.info(`📋 Tipo do evento: ${m.type}`);
+      logger.info(`📊 Total de mensagens: ${messages.length}`);
+      logger.info(`📋 Tipo do evento: ${type}`);
       logger.info('═══════════════════════════════════════════════════════════');
       
-      for (const msg of m.messages) {
-        logger.info('┌─────────────────────────────────────────────────────────');
-        logger.info('│ 📤 PROCESSANDO MENSAGEM...');
-        logger.info(`│ 💬 Key: ${JSON.stringify(msg.key)}`);
-        logger.info(`│ 📝 Message: ${JSON.stringify(msg.message)}`);
-        logger.info('└─────────────────────────────────────────────────────────');
-        
-        try {
-          await messageHandler.handleIncomingMessage(msg);
-        } catch (error) {
-          logger.error('❌ ERRO ao processar mensagem:', error);
+      // Baileys 7.0: processar apenas mensagens "notify" (novas)
+      if (type === 'notify') {
+        for (const msg of messages) {
+          logger.info('┌─────────────────────────────────────────────────────────');
+          logger.info('│ 📤 PROCESSANDO MENSAGEM NOVA...');
+          logger.info(`│ 💬 Key: ${JSON.stringify(msg.key)}`);
+          logger.info(`│ 📝 Message: ${JSON.stringify(msg.message)}`);
+          logger.info('└─────────────────────────────────────────────────────────');
+          
+          try {
+            await messageHandler.handleIncomingMessage(msg);
+          } catch (error) {
+            logger.error('❌ ERRO ao processar mensagem:', error);
+          }
         }
+      } else {
+        logger.info(`⏩ Ignorando mensagens antigas (type: ${type})`);
       }
     });
     
