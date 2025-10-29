@@ -32,16 +32,18 @@ export async function startWhatsAppClient() {
     auth: state,
     browser: Browsers.macOS('Desktop'),
     printQRInTerminal: false,
-    // Não especificar version - deixar Baileys 7.0 escolher automaticamente
+    // Configurações específicas para VM/Cloud (Oracle Cloud)
+    shouldSyncHistoryMessage: () => false, // Evita problemas de sincronização em VMs
+    syncFullHistory: false,
     defaultQueryTimeoutMs: undefined,
     connectTimeoutMs: 60_000,
     keepAliveIntervalMs: 30_000,
     qrTimeout: 60_000,
-    syncFullHistory: false,
     markOnlineOnConnect: false,
     emitOwnEvents: false,
     getMessage: async (key) => {
-      return { conversation: 'hello' };
+      // Retornar vazio para evitar travamentos em cloud
+      return { conversation: '' };
     },
     logger: pino({ level: 'silent' }),
   });
