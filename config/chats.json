@@ -1,20 +1,18 @@
 {
   "enabled": true,
   "authorizedChats": [
-    "5511977744301@s.whatsapp.net",
-    "5511985000118@s.whatsapp.net",
+    "5511997744301@s.whatsapp.net",
     "5511931501606@s.whatsapp.net",
     "5511961842008@s.whatsapp.net",
     "5511998036078@s.whatsapp.net",
-    "5511915269292@s.whatsapp.net",
-    "5511984027282@s.whatsapp.net" 
+    "5511915269292@s.whatsapp.net"
   ],
   "authorizedGroups": [
     "120363387051776715@g.us"
   ],
   "blacklist": [],
   "specialContacts": {
-    "5511977744301@s.whatsapp.net": {
+    "5511997744301@s.whatsapp.net": {
       "type": "namorada",
       "name": "amor",
       "responseStyle": "carinhoso_acolhedor"
