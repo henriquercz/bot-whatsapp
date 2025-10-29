@@ -40,17 +40,25 @@ export class ConversationMemory {
     }
   }
 
-  getRecentMessages(chatId, limit = 10) {
+  getRecentMessages(chatId, limit = 10, maxAgeHours = 1) {
     try {
+      // Filtrar mensagens das últimas X horas (padrão: 1h)
+      const cutoffTime = Date.now() - (maxAgeHours * 60 * 60 * 1000);
+      
       const stmt = this.db.prepare(`
         SELECT * FROM messages 
         WHERE chat_id = ? 
+        AND timestamp > ?
         ORDER BY timestamp DESC 
         LIMIT ?
       `);
 
-      const messages = stmt.all(chatId, limit);
-      return messages.reverse();
+      const messages = stmt.all(chatId, cutoffTime, limit);
+      const reversed = messages.reverse();
+      
+      logger.info(`📚 Histórico: ${reversed.length}/${limit} mensagens (última ${maxAgeHours}h)`);
+      
+      return reversed;
 
     } catch (error) {
       logger.error('❌ Erro ao buscar mensagens:', error);

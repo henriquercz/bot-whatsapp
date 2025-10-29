@@ -204,16 +204,21 @@ Agora responda de forma carinhosa mas natural:`;
 
   formatHistory(conversationHistory) {
     if (!conversationHistory || conversationHistory.length === 0) {
-      return '';
+      return '\n=== CONTEXTO ===\nConversa recente iniciada. Sem histórico anterior.\n';
     }
 
-    let historyText = '\n=== CONTEXTO DA CONVERSA (MENSAGENS ANTERIORES) ===\n\n';
+    let historyText = '\n=== CONTEXTO DA CONVERSA ===\n';
+    historyText += `(⚠️ ${conversationHistory.length} mensagem${conversationHistory.length > 1 ? 's' : ''} recente${conversationHistory.length > 1 ? 's' : ''} - pode haver mais contexto não exibido)\n\n`;
     
-    conversationHistory.forEach(msg => {
-      historyText += `[${msg.sender}]: ${msg.message}\n`;
+    conversationHistory.forEach((msg, index) => {
+      // Proteção contra dados inválidos
+      if (msg && msg.sender && msg.message) {
+        historyText += `[${msg.sender}]: ${msg.message}\n`;
+      }
     });
     
     historyText += '\n=== FIM DO CONTEXTO ===\n';
+    historyText += 'IMPORTANTE: Responda considerando APENAS o contexto mostrado acima. Se precisar de mais informações, pergunte naturalmente.\n';
     
     return historyText;
   }

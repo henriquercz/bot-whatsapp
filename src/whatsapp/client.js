@@ -30,16 +30,20 @@ export async function startWhatsAppClient() {
 
   const sock = makeWASocket({
     auth: state,
-    browser: Browsers.macOS('Safari'),
-    version: [2, 3000, 1025091846], // ← Versão específica que funciona
-    defaultQueryTimeoutMs: 0, // ← Sem timeout de query
-    connectionTimeoutMs: 60_000, // ← 60 segundos de timeout
+    browser: Browsers.macOS('Desktop'),
+    printQRInTerminal: false,
+    // Não especificar version - deixar Baileys 7.0 escolher automaticamente
+    defaultQueryTimeoutMs: undefined,
+    connectTimeoutMs: 60_000,
+    keepAliveIntervalMs: 30_000,
+    qrTimeout: 60_000,
     syncFullHistory: false,
     markOnlineOnConnect: false,
+    emitOwnEvents: false,
     getMessage: async (key) => {
       return { conversation: 'hello' };
     },
-    logger: pino({ level: 'fatal' }),
+    logger: pino({ level: 'silent' }),
   });
 
   // Salvar credenciais quando atualizadas

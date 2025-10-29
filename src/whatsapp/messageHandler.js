@@ -254,7 +254,8 @@ export class MessageHandler {
       const isGroup = chatId.includes('@g.us');
       const historyLimit = isGroup ? 10 : 5;
       
-      // Buscar histórico recente
+      // Buscar histórico recente (padrão: última 1 hora)
+      // Para alterar janela temporal, adicione 3º parâmetro: getRecentMessages(chatId, limit, hours)
       logger.info(`📚 Buscando histórico recente (${isGroup ? 'grupo' : 'privado'}: ${historyLimit} mensagens)...`);
       const recentMessages = this.memory.getRecentMessages(chatId, historyLimit);
       logger.info(`📚 Histórico obtido: ${recentMessages.length} mensagens`);
@@ -319,6 +320,11 @@ export class MessageHandler {
   }
 
   formatHistoryForGemini(messages) {
+    // Proteção contra array inválido
+    if (!messages || !Array.isArray(messages)) {
+      return [];
+    }
+    
     // Formatar histórico com diferenciação clara de remetentes
     return messages.map(msg => {
       const isMe = msg.is_from_me === 1;
