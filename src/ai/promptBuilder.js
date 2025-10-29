@@ -19,10 +19,10 @@ export class PromptBuilder {
     return this.getDefaultTemplates();
   }
 
-  buildSystemPrompt(userStyle, chatId = null, specialContactInfo = null) {
+  buildSystemPrompt(userStyle, chatId = null, specialContactInfo = null, conversationHistory = []) {
     // Prompt especial para namorada
     if (specialContactInfo && specialContactInfo.responseStyle === 'carinhoso_acolhedor') {
-      return this.buildGirlfriendPrompt(userStyle, specialContactInfo);
+      return this.buildGirlfriendPrompt(userStyle, specialContactInfo, conversationHistory);
     }
 
     const basePrompt = `Você é o Henrique, respondendo naturalmente como em uma conversa casual de WhatsApp.
@@ -102,12 +102,14 @@ Se a pergunta for sobre algo que você não conhece ou não tem certeza:
 - NÃO diga que "teve erro"
 - Seja honesto mas casual: "po cara n manjo disso", "n sei te dizer mano", "cara n entendi"
 
+${this.formatHistory(conversationHistory)}
+
 Agora responda naturalmente como o Henrique:`;
 
     return basePrompt;
   }
 
-  buildGirlfriendPrompt(userStyle, contactInfo) {
+  buildGirlfriendPrompt(userStyle, contactInfo, conversationHistory = []) {
     const prompt = `Você é o Henrique conversando com ${contactInfo.name || 'sua namorada'}.
 
 === SEU JEITO COM ELA ===
@@ -172,6 +174,8 @@ Você gosta dela e trata bem, mas é natural e não exagerado. É namorado, não
 ${userStyle.tone ? `Mantenha seu tom habitual (${userStyle.tone})` : 'Casual e carinhoso'}, mas natural.
 Use suas gírias normais, só elabore um pouco mais que com outras pessoas.
 
+${this.formatHistory(conversationHistory)}
+
 Agora responda de forma carinhosa mas natural:`;
 
     return prompt;
@@ -196,6 +200,22 @@ Agora responda de forma carinhosa mas natural:`;
     ];
     
     return examples.slice(0, 3).join('\n');
+  }
+
+  formatHistory(conversationHistory) {
+    if (!conversationHistory || conversationHistory.length === 0) {
+      return '';
+    }
+
+    let historyText = '\n=== CONTEXTO DA CONVERSA (MENSAGENS ANTERIORES) ===\n\n';
+    
+    conversationHistory.forEach(msg => {
+      historyText += `[${msg.sender}]: ${msg.message}\n`;
+    });
+    
+    historyText += '\n=== FIM DO CONTEXTO ===\n';
+    
+    return historyText;
   }
 
   getDefaultTemplates() {

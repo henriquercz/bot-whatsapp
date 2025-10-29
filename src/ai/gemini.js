@@ -42,15 +42,21 @@ export class GeminiAI {
       this.callCount++;
       logger.debug(`📤 Chamada Gemini #${this.callCount}`);
 
-      // Construir prompt personalizado
-      const systemPrompt = this.promptBuilder.buildSystemPrompt(userStyle, chatId, specialContactInfo);
+      // Construir prompt personalizado com histórico
+      const systemPrompt = this.promptBuilder.buildSystemPrompt(
+        userStyle, 
+        chatId, 
+        specialContactInfo, 
+        conversationHistory  // Passar histórico
+      );
       
       // Chamar Gemini
       logger.info('📞 Chamando Gemini 2.5 Flash...');
       logger.info(`📝 Current message: ${currentMessage}`);
+      logger.info(`📚 Histórico incluído: ${conversationHistory?.length || 0} mensagens`);
       
-      // Montar o prompt completo simples
-      const fullPrompt = `${systemPrompt}\n\nUsuário disse: "${currentMessage}"\n\nSua resposta natural:`;
+      // Montar o prompt completo com histórico e mensagem atual
+      const fullPrompt = `${systemPrompt}\n\n=== MENSAGEM ATUAL PARA RESPONDER ===\n\n"${currentMessage}"\n\n=== SUA RESPOSTA ===`;
       
       logger.info('✅ Enviando para Gemini...');
       const result = await this.model.generateContent(fullPrompt);

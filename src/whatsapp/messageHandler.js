@@ -250,9 +250,13 @@ export class MessageHandler {
         logger.info(`💝 Contato especial detectado: ${specialContactInfo.type} (${specialContactInfo.name})`);
       }
 
+      // Determinar se é grupo para limite de histórico
+      const isGroup = chatId.includes('@g.us');
+      const historyLimit = isGroup ? 10 : 5;
+      
       // Buscar histórico recente
-      logger.info('📚 Buscando histórico recente...');
-      const recentMessages = this.memory.getRecentMessages(chatId, 10);
+      logger.info(`📚 Buscando histórico recente (${isGroup ? 'grupo' : 'privado'}: ${historyLimit} mensagens)...`);
+      const recentMessages = this.memory.getRecentMessages(chatId, historyLimit);
       logger.info(`📚 Histórico obtido: ${recentMessages.length} mensagens`);
       
       // Obter perfil de estilo
@@ -315,9 +319,20 @@ export class MessageHandler {
   }
 
   formatHistoryForGemini(messages) {
-    return messages.map(msg => ({
-      role: msg.is_from_me === 1 ? 'model' : 'user',
-      parts: [{ text: msg.message }]
-    }));
+    // Formatar histórico com diferenciação clara de remetentes
+    return messages.map(msg => {
+      const isMe = msg.is_from_me === 1;
+      const sender = msg.sender || 'desconhecido';
+      
+      // Extrair últimos 4 dígitos do número para identificação
+      const phoneMatch = sender.match(/(\d+)@/);
+      const lastDigits = phoneMatch ? phoneMatch[1].slice(-4) : '????';
+      
+      return {
+        sender: isMe ? 'você' : `pessoa (${lastDigits})`,
+        message: msg.message,
+        timestamp: msg.timestamp
+      };
+    });
   }
 }
