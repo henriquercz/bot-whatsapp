@@ -59,8 +59,11 @@ async function main() {
       chatConfig
     );
     
-    // Listener de TODOS os eventos para debug
+    console.log('\n\n🚀🚀🚀 REGISTRANDO LISTENER DE MENSAGENS 🚀🚀🚀\n\n');
+    
+    // Listener de mensagens
     sock.ev.on('messages.upsert', async (m) => {
+      console.log('\n\n📬📬📬 MENSAGEM RECEBIDA! 📬📬📬\n\n');
       logger.info('═══════════════════════════════════════════════════════════');
       logger.info(`📬 EVENTO messages.upsert RECEBIDO!`);
       logger.info(`📊 Total de mensagens: ${m.messages.length}`);
@@ -82,14 +85,10 @@ async function main() {
       }
     });
     
+    console.log('\n\n✅✅✅ LISTENER REGISTRADO COM SUCESSO ✅✅✅\n\n');
     logger.info('🤖 Bot pronto para receber mensagens!');
-    logger.info('📝 Envie suas próprias mensagens para o bot aprender seu estilo');
+    logger.info('📝 Envie uma mensagem para qualquer chat para testar');
     logger.info('⚙️ Use !authorize em um chat para autorizar respostas automáticas');
-    logger.info('🎯 Listener de mensagens registrado com sucesso!');
-    logger.info('');
-    logger.info('═══════════════════════════════════════════════════════════');
-    logger.info('   🔍 MODO DEBUG ATIVADO - Envie uma mensagem para testar');
-    logger.info('═══════════════════════════════════════════════════════════');
     
   } catch (error) {
     logger.error('❌ Erro fatal ao iniciar bot:', error);

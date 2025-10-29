@@ -97,6 +97,8 @@ export async function startWhatsAppClient() {
       logger.info('⏳ Conectando ao WhatsApp...');
     } else if (connection === 'open') {
       logger.info('✅ Conectado ao WhatsApp com sucesso!');
+      logger.info('📡 Conexão estabelecida! Bot está online e pronto para receber mensagens.');
+      logger.info('📱 Envie uma mensagem de teste para qualquer chat autorizado.');
       pairingCodeRequested = false; // Reset para próxima reconexão
       if (isNewLogin) {
         logger.info('🆕 Nova autenticação realizada!');
